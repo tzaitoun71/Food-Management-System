@@ -1,0 +1,258 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: userdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: userdb
+spec:
+  selector:
+    app: userdb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userdb
+spec:
+  selector:
+    matchLabels:
+      app: userdb
+  template:
+    metadata:
+      labels:
+        app: userdb
+    spec:
+      containers:
+        - name: userdb
+          image: tzaitoun/coe692:userdb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/userdb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: userdb-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: menudb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: menudb
+spec:
+  selector:
+    app: menudb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: menudb
+spec:
+  selector:
+    matchLabels:
+      app: menudb
+  template:
+    metadata:
+      labels:
+        app: menudb
+    spec:
+      containers:
+        - name: menudb
+          image: tzaitoun/coe692:menudb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/menudb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: menudb-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: menumanagement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: menumanagement
+  template:
+    metadata:
+      labels:
+        app: menumanagement
+    spec:
+      containers:
+        - name: menumanagement
+          image: tzaitoun/coe692:menuWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MENU_DB_URL
+              value: menudb:3306
+            - name: kubeMQAddress
+              value: 10.36.13.24:50000
+          imagePullPolicy: Always
+---
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: orderdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderdb
+spec:
+  selector:
+    app: orderdb
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderdb
+spec:
+  selector:
+    matchLabels:
+      app: orderdb
+  template:
+    metadata:
+      labels:
+        app: orderdb
+    spec:
+      containers:
+        - name: orderdb
+          image: tzaitoun/coe692:orderdb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: storage
+              mountPath: /data/orderdb
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: orderdb-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ordermanagement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ordermanagement
+  template:
+    metadata:
+      labels:
+        app: ordermanagement
+    spec:
+      containers:
+        - name: ordermanagement
+          image: tzaitoun/coe692:orderWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ORDER_DB_URL
+              value: orderdb:3306
+            - name: kubeMQAddress
+              value: 10.36.13.24:50000
+          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: tzaitoun/coe692:frontendWebApp
+          ports:
+            - containerPort: 8080
+          env:
+            - name: USER_DB_URL
+              value: userdb:3306
+            - name: orderService
+              value: ordermanagement:80
+            - name: menuService
+              value: menumanagement:80
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: menumanagement
+spec:
+  selector:
+    app: menumanagement
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ordermanagement
+spec:
+  selector:
+    app: ordermanagement
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: LoadBalancer
