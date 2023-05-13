@@ -39,9 +39,9 @@
             </thead>
             <tbody>
                 <%
-                    GetOrderXML tariqtheorder = (GetOrderXML) request.getAttribute("listoforders");
-                    if (tariqtheorder != null && tariqtheorder.getOrders() != null) {
-                        ArrayList<Order> orderList = tariqtheorder.getOrders();
+                    GetOrderXML order = (GetOrderXML) request.getAttribute("listoforders");
+                    if (order != null && order.getOrders() != null) {
+                        ArrayList<Order> orderList = order.getOrders();
                         for (Order order : orderList) {
                 %>
                 <tr>
