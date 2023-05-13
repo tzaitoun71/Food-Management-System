@@ -17,9 +17,9 @@
     </head>
     <body>
         <%
-            FoodXML tariqthefood = (FoodXML) request.getAttribute("listoffood");
-            ArrayList<FoodItem> foodlist = tariqthefood.getMenu();
-            request.getSession().setAttribute("listoffood", tariqthefood.getMenu());
+            FoodXML food = (FoodXML) request.getAttribute("listoffood");
+            ArrayList<FoodItem> foodlist = food.getMenu();
+            request.getSession().setAttribute("listoffood", food.getMenu());
         %>
         <center><h2>Food Menu</h2></center>
         <center><h2>Login to Buy Food</h2></center>
