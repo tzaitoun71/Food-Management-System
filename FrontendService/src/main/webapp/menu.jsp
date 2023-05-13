@@ -11,9 +11,9 @@
     <body>
         <%
 //            ArrayList<FoodItem> foodlist = (ArrayList) request.getSession().getAttribute("listoffood");
-            FoodXML tariqthefood = (FoodXML) request.getAttribute("listoffood");
+            FoodXML food = (FoodXML) request.getAttribute("listoffood");
             
-            ArrayList<FoodItem> foodlist = tariqthefood.getMenu();
+            ArrayList<FoodItem> foodlist = food.getMenu();
             HashMap<String, FoodItem> cart = (HashMap<String, FoodItem>) session.getAttribute("cart");
             double cartTotal = 0.0;
             if (cart != null) {
@@ -22,7 +22,7 @@
                 }
             }
             
-            request.getSession().setAttribute("listoffood", tariqthefood.getMenu());
+            request.getSession().setAttribute("listoffood", food.getMenu());
         %>
         <center><h2>Food Menu</h2></center>
         <center><h2>Hello <%=session.getAttribute("uname")%></h2></center>
